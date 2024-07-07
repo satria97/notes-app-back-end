@@ -37,4 +37,79 @@ class NotesHandler {
             return response;
         }
     }
+
+    getNotesHandler() {
+        const notes = this._service.getNotes();
+        return {
+            status: 'Success',
+            data: {
+                notes,
+            },
+        }
+    }
+
+    getNoteByIdHandler(id) {
+        try {
+            // dapatkan nilai id note yang dikirim client melalui path parameter
+            const {id} = request.params;
+    
+            // panggil fungsi this._service.getNoteById untuk mendapatkan objek note sesuai id yang diberikan client.
+            const note = this._service.getNoteById(id);
+            return {
+                status: 'Success',
+                data: {
+                    note,
+                },
+            }
+        } catch (error) {
+            const response = h.response({
+                status: 'Fail',
+                message: error.message,
+            });
+            response.code(404);
+            return response;
+        }
+    }
+
+    putNoteByIdHandler(request) {
+        try {
+            // dapatkan nilai id dari request.params yang digunakan pada path parameter sebagai id dari note.
+            const {id} = request.params;
+    
+            // kita panggil fungsi this._service.editNoteById, kemudian masukkan id sebagai parameter pertama, 
+            // dan request.payload yang akan menyediakan title, body, dan tags untuk objek note baru.
+            this._service.editNoteById(id, request.payload);
+            return {
+                status: 'Success',
+                message: 'Catatan berhasil diperbarui',
+            }
+        } catch (error) {
+            const response = h.response({
+                status: 'Fail',
+                message: error.message,
+            });
+            response.code(404);
+            return response;
+        }
+    }
+
+    deleteNoteByIdHandler(request) {
+        try {
+            // dapatkan nilai note id yang dikirim client melalui path parameter
+            const {id} = request.params;
+            this._service.deleteNoteById(id);
+            return {
+                status: 'Success',
+                message: 'Catatan berhasil dihapus',
+            }
+        } catch (error) {
+            const response = h.response({
+                status: 'Fail',
+                message: error.message,
+            });
+            response.code(404);
+            return response;
+        }
+    }
 }
+module.exports = NotesHandler;
