@@ -11,9 +11,13 @@
     },
     "rules": {
         "no-console": "off",
-        "no-underscore-dangle": "off",
-        "no-unused-vars": "off",
-        "indent": [2, "tab"],
-		"no-tabs": 0
+        "linebreak-style": "off",
+        "indent": [4, "tab"],
+        "no-tabs": 0,
+        "no-underscore-dangle": 0,
+        "comma-dangle": 0,
+        "max-len": 0,
+        "function-paren-newline": 0,
+        "implicit-arrow-linebreak": 0
     }
 }
