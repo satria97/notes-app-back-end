@@ -6,9 +6,15 @@ class NotesHandler {
         // Parameter service nantinya akan diberikan nilai instance dari NotesService. 
         // Dengan begitu, NotesHandler memiliki akses untuk mengelola resource notes melalui properti this._service.
         this._service = service;
+
+        this.postNoteHandler = this.postNoteHandler.bind(this);
+        this.getNotesHandler = this.getNotesHandler.bind(this);
+        this.getNoteByIdHandler = this.getNoteByIdHandler.bind(this);
+        this.putNoteByIdHandler = this.putNoteByIdHandler.bind(this);
+        this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
 	}
 
-    postNoteHandler(request) {
+    postNoteHandler(request, h) {
         try {
             const {title = 'untitled', body, tags} = request.payload;
     
@@ -41,14 +47,14 @@ class NotesHandler {
     getNotesHandler() {
         const notes = this._service.getNotes();
         return {
-            status: 'Success',
+            status: 'success',
             data: {
                 notes,
             },
         }
     }
 
-    getNoteByIdHandler(id) {
+    getNoteByIdHandler(request, h) {
         try {
             // dapatkan nilai id note yang dikirim client melalui path parameter
             const {id} = request.params;
@@ -56,14 +62,14 @@ class NotesHandler {
             // panggil fungsi this._service.getNoteById untuk mendapatkan objek note sesuai id yang diberikan client.
             const note = this._service.getNoteById(id);
             return {
-                status: 'Success',
+                status: 'success',
                 data: {
                     note,
                 },
             }
         } catch (error) {
             const response = h.response({
-                status: 'Fail',
+                status: 'fail',
                 message: error.message,
             });
             response.code(404);
@@ -71,7 +77,7 @@ class NotesHandler {
         }
     }
 
-    putNoteByIdHandler(request) {
+    putNoteByIdHandler(request, h) {
         try {
             // dapatkan nilai id dari request.params yang digunakan pada path parameter sebagai id dari note.
             const {id} = request.params;
@@ -80,12 +86,12 @@ class NotesHandler {
             // dan request.payload yang akan menyediakan title, body, dan tags untuk objek note baru.
             this._service.editNoteById(id, request.payload);
             return {
-                status: 'Success',
+                status: 'success',
                 message: 'Catatan berhasil diperbarui',
             }
         } catch (error) {
             const response = h.response({
-                status: 'Fail',
+                status: 'fail',
                 message: error.message,
             });
             response.code(404);
@@ -93,18 +99,18 @@ class NotesHandler {
         }
     }
 
-    deleteNoteByIdHandler(request) {
+    deleteNoteByIdHandler(request, h) {
         try {
             // dapatkan nilai note id yang dikirim client melalui path parameter
             const {id} = request.params;
             this._service.deleteNoteById(id);
             return {
-                status: 'Success',
+                status: 'success',
                 message: 'Catatan berhasil dihapus',
             }
         } catch (error) {
             const response = h.response({
-                status: 'Fail',
+                status: 'fail',
                 message: error.message,
             });
             response.code(404);
