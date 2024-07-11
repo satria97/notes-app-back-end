@@ -21,54 +21,27 @@ class NotesHandler {
 	}
 
     postNoteHandler(request, h) {
-        try {
-            // gunakan validateNotePayload di dalam postNoteHandler karena pada fungsi tersebut 
-            // kita mendapatkan data dari pengguna dalam bentuk payload.
-            this._validator.validateNotePayload(request.payload);
-            const {title = 'untitled', body, tags} = request.payload;
-    
-            // untuk proses memasukan catatan baru, cukup panggil fungsi this._service.addNote
-            // this._service.addNote({title, body, tags});
-    
-            // Karena fungsi this._service.addNote akan mengembalikan id catatan yang disimpan, 
-            // maka buatlah variabel noteId untuk menampung nilainya
-            const noteId = this._service.addNote({title, body, tags})
-    
-            const response = h.response({
-                status: 'success',
-                message: 'Catatan berhasil ditambahkan',
-                data: {
-                  noteId,
-                },
-            });
-            response.code(201);
-            return response;  
-        } catch (error) {
-            // const response = h.response({
-            //     status: 'fail',
-            //     message: error.message,
-            // });
-            // response.code(400);
-            // return response;
+        // gunakan validateNotePayload di dalam postNoteHandler karena pada fungsi tersebut 
+        // kita mendapatkan data dari pengguna dalam bentuk payload.
+        this._validator.validateNotePayload(request.payload);
+        const {title = 'untitled', body, tags} = request.payload;
 
-            if (error instanceof ClientError) {
-                const response = h.response({
-                    status: 'fail',
-                    message: error.message,
-                });
-                response.code(error.statusCode);
-                return response;
-            }
+        // untuk proses memasukan catatan baru, cukup panggil fungsi this._service.addNote
+        // this._service.addNote({title, body, tags});
 
-            // Server ERROR!
-            const response = h.response({
-                status: 'error',
-                message: 'Maaf, terjadi kegagalan pada server kami.',
-            });
-            response.code(500);
-            console.error(error);
-            return response;
-        }
+        // Karena fungsi this._service.addNote akan mengembalikan id catatan yang disimpan, 
+        // maka buatlah variabel noteId untuk menampung nilainya
+        const noteId = this._service.addNote({title, body, tags})
+
+        const response = h.response({
+            status: 'success',
+            message: 'Catatan berhasil ditambahkan',
+            data: {
+              noteId,
+            },
+        });
+        response.code(201);
+        return response;
     }
 
     getNotesHandler() {
@@ -82,124 +55,45 @@ class NotesHandler {
     }
 
     getNoteByIdHandler(request, h) {
-        try {
-            // dapatkan nilai id note yang dikirim client melalui path parameter
-            const {id} = request.params;
+        // dapatkan nilai id note yang dikirim client melalui path parameter
+        const {id} = request.params;
     
-            // panggil fungsi this._service.getNoteById untuk mendapatkan objek note sesuai id yang diberikan client.
-            const note = this._service.getNoteById(id);
-            return {
-                status: 'success',
-                data: {
-                    note,
-                },
-            }
-        } catch (error) {
-            // const response = h.response({
-            //     status: 'fail',
-            //     message: error.message,
-            // });
-            // response.code(404);
-            // return response;
-            if (error instanceof ClientError) {
-                const response = h.response({
-                    status: 'fail',
-                    message: error.message,
-                });
-                response.code(error.statusCode);
-                return response;
-            }
-         
-            // Server ERROR!
-            const response = h.response({
-                status: 'error',
-                message: 'Maaf, terjadi kegagalan pada server kami.',
-            });
-            response.code(500);
-            console.error(error);
-            return response;
+        // panggil fungsi this._service.getNoteById untuk mendapatkan objek note sesuai id yang diberikan client.
+        const note = this._service.getNoteById(id);
+        return {
+            status: 'success',
+            data: {
+                note,
+            },
         }
     }
 
     putNoteByIdHandler(request, h) {
-        try {
-            // gunakan validateNotePayload di dalam putNoteHandler karena pada fungsi tersebut 
-            // kita mendapatkan data dari pengguna dalam bentuk payload.
-            // Pastikan Anda memanggilnya sebelum mengonsumsi nilai dari request.payload itu sendiri. 
-            // Bila salah peletakan, bisa-bisa data yang buruk tetap diproses. 
-            // Apalagi bila Anda memanggil setelah aksi menyimpan atau mengubah note.
-            this._validator.validateNotePayload(request.payload);
+        // gunakan validateNotePayload di dalam putNoteHandler karena pada fungsi tersebut 
+        // kita mendapatkan data dari pengguna dalam bentuk payload.
+        // Pastikan Anda memanggilnya sebelum mengonsumsi nilai dari request.payload itu sendiri. 
+        // Bila salah peletakan, bisa-bisa data yang buruk tetap diproses. 
+        // Apalagi bila Anda memanggil setelah aksi menyimpan atau mengubah note.
+        this._validator.validateNotePayload(request.payload);
 
-            // dapatkan nilai id dari request.params yang digunakan pada path parameter sebagai id dari note.
-            const {id} = request.params;
+        // dapatkan nilai id dari request.params yang digunakan pada path parameter sebagai id dari note.
+        const {id} = request.params;
     
-            // kita panggil fungsi this._service.editNoteById, kemudian masukkan id sebagai parameter pertama, 
-            // dan request.payload yang akan menyediakan title, body, dan tags untuk objek note baru.
-            this._service.editNoteById(id, request.payload);
-            return {
-                status: 'success',
-                message: 'Catatan berhasil diperbarui',
-            }
-        } catch (error) {
-            // const response = h.response({
-            //     status: 'fail',
-            //     message: error.message,
-            // });
-            // response.code(404);
-            // return response;
-            if (error instanceof ClientError) {
-                const response = h.response({
-                    status: 'fail',
-                    message: error.message,
-                });
-                response.code(error.statusCode);
-                return response;
-            }
-         
-            // Server ERROR!
-            const response = h.response({
-                status: 'error',
-                message: 'Maaf, terjadi kegagalan pada server kami.',
-            });
-            response.code(500);
-            console.error(error);
-            return response;
+        // kita panggil fungsi this._service.editNoteById, kemudian masukkan id sebagai parameter pertama, 
+        // dan request.payload yang akan menyediakan title, body, dan tags untuk objek note baru.
+        this._service.editNoteById(id, request.payload);
+        return {
+            status: 'success',
+            message: 'Catatan berhasil diperbarui',
         }
     }
 
     deleteNoteByIdHandler(request, h) {
-        try {
-            // dapatkan nilai note id yang dikirim client melalui path parameter
-            const {id} = request.params;
-            this._service.deleteNoteById(id);
-            return {
-                status: 'success',
-                message: 'Catatan berhasil dihapus',
-            }
-        } catch (error) {
-            // const response = h.response({
-            //     status: 'fail',
-            //     message: error.message,
-            // });
-            // response.code(404);
-            // return response;
-            if (error instanceof ClientError) {
-                const response = h.response({
-                    status: 'fail',
-                    message: error.message,
-                });
-                response.code(error.statusCode);
-                return response;
-            }
-         
-            // Server ERROR!
-            const response = h.response({
-                status: 'error',
-                message: 'Maaf, terjadi kegagalan pada server kami.',
-            });
-            response.code(500);
-            console.error(error);
-            return response;
+        const {id} = request.params;
+        this._service.deleteNoteById(id);
+        return {
+            status: 'success',
+            message: 'Catatan berhasil dihapus',
         }
     }
 }

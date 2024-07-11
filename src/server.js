@@ -2,6 +2,7 @@ const Hapi = require('@hapi/hapi');
 const notes = require('./api/notes');
 const NotesService = require('./services/inMemory/NotesService');
 const NotesValidator = require('./validator/notes');
+const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   // buat instance dari NotesService dengan nama notesService.
@@ -27,8 +28,27 @@ const init = async () => {
     options: {
       service: notesService,
       // Sama seperti NotesService, untuk mengirimkan data pada plugin, kita akan manfaatkan objek options.
-      validarot: NotesValidator
+      validator: NotesValidator
     },
+  });
+
+  server.ext('onPreResponse', (request, h) => {
+    // mendapatkan konteks response dari request
+    const {response} = request;
+
+    // penanganan client error secara internal
+    // Jika error berasal dari instance ClientError, response akan mengembalikan status fail, 
+    // status code, dan message sesuai dengan errornya. Jika error bukan ClientError,
+    // kembalikan response apa adanya, biarlah Hapi yang menangani response secara default.
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
+      return newResponse;
+    }
+    return h.continue;
   });
 
   await server.start();
