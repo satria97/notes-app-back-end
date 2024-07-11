@@ -1,3 +1,4 @@
+const InvariantError = require("../../exceptions/InvariantError");
 const { NotePayloadSchema } = require("./schema")
 
 const NotesValidator = {
@@ -7,7 +8,9 @@ const NotesValidator = {
         // evaluasi validationResult. Jika properti error tidak undefined, maka kita bangkitkan error 
         // dengan membawa pesan dari properti validationResult.error.message.
         if (validationResult.error) {
-            throw new Error(validationResult.error.message);
+            // throw new Error(validationResult.error.message);
+            // Lalu ubahlah menjadi seperti ini:
+            throw new InvariantError(validationResult.error.message);
         }
     }
 }
