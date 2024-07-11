@@ -1,11 +1,15 @@
 class NotesHandler {
 	// menerima parameter service
-	constructor(service) {
+	constructor(service, validator) {
         // buat properti _service dan inisialisasikan nilainya dengan service dari parameter constructor.
         // nama variabel diawali underscore (_) dipertimbangkan sebagai lingkup privat secara konvensi.
         // Parameter service nantinya akan diberikan nilai instance dari NotesService. 
         // Dengan begitu, NotesHandler memiliki akses untuk mengelola resource notes melalui properti this._service.
         this._service = service;
+
+        // tambahkan validator di parameter constructor serta inisialisasi nilainya sebagai properti this._validator.
+        // Dengan demikian, sekarang kita bisa mengakses fungsi validateNotePayload melalui this._validator.
+        this._validator = validator;
 
         this.postNoteHandler = this.postNoteHandler.bind(this);
         this.getNotesHandler = this.getNotesHandler.bind(this);
@@ -16,6 +20,9 @@ class NotesHandler {
 
     postNoteHandler(request, h) {
         try {
+            // gunakan validateNotePayload di dalam postNoteHandler karena pada fungsi tersebut 
+            // kita mendapatkan data dari pengguna dalam bentuk payload.
+            this._validator.validateNotePayload(request.payload);
             const {title = 'untitled', body, tags} = request.payload;
     
             // untuk proses memasukan catatan baru, cukup panggil fungsi this._service.addNote
@@ -79,6 +86,13 @@ class NotesHandler {
 
     putNoteByIdHandler(request, h) {
         try {
+            // gunakan validateNotePayload di dalam putNoteHandler karena pada fungsi tersebut 
+            // kita mendapatkan data dari pengguna dalam bentuk payload.
+            // Pastikan Anda memanggilnya sebelum mengonsumsi nilai dari request.payload itu sendiri. 
+            // Bila salah peletakan, bisa-bisa data yang buruk tetap diproses. 
+            // Apalagi bila Anda memanggil setelah aksi menyimpan atau mengubah note.
+            this._validator.validateNotePayload(request.payload);
+
             // dapatkan nilai id dari request.params yang digunakan pada path parameter sebagai id dari note.
             const {id} = request.params;
     
