@@ -1,5 +1,8 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
+const { mapDBToModel } = require("../../utils");
+const InvariantError = require('../../exceptions/InvariantError')
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class NotesService {
     // buat constructor dan di dalamnya inisialisasi properti this._pool dengan instance dari package pg.Pool.
@@ -29,5 +32,26 @@ class NotesService {
             throw new InvariantError('Catatan gagal di tambahkan');
         }
         return result.rows[0].id;
+    }
+
+    async getNotes() {
+        const result = await this._pool.query('SELECT * FROM notes');
+        return result.rows.map(mapDBToModel);
+    }
+
+    async getNoteById(id) {
+        // lakukan query untuk mendapatkan note di dalam database berdasarkan id yang diberikan.
+        const query = {
+            text: 'SELECT FROM notes WHERE id = $1',
+            values: [id],
+        };
+        const result = await this._pool.query(query);
+
+        // periksa nilai result.rows, bila nilainya 0 (false) maka bangkitkan NotFoundError. Bila tidak, 
+        // maka kembalikan dengan result.rows[0] yang sudah di-mapping dengan fungsi mapDBToModel.
+        if (!result.rows[0]) {
+            throw new NotFoundError('Catatan tidak ditemukan');
+        }
+        return result.rows.map(mapDBToModel)[0];
     }
 }
