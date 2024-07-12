@@ -42,7 +42,7 @@ class NotesService {
     async getNoteById(id) {
         // lakukan query untuk mendapatkan note di dalam database berdasarkan id yang diberikan.
         const query = {
-            text: 'SELECT FROM notes WHERE id = $1',
+            text: 'SELECT * FROM notes WHERE id = $1',
             values: [id],
         };
         const result = await this._pool.query(query);
@@ -72,7 +72,7 @@ class NotesService {
 
     async deleteNoteById(id) {
         const query = {
-            text: 'DELETE FROM notes WHERE id = $ RETURNING id',
+            text: 'DELETE FROM notes WHERE id = $1 RETURNING id',
             values: [id],
         };
         const result = await this._pool.query(query);
