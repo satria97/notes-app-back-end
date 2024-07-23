@@ -12,7 +12,6 @@ const init = async () => {
   // buat instance dari NotesService dengan nama notesService.
   const notesService = new NotesService();
 
-
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -38,10 +37,10 @@ const init = async () => {
 
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
-    const {response} = request;
+    const { response } = request;
 
     // penanganan client error secara internal
-    // Jika error berasal dari instance ClientError, response akan mengembalikan status fail, 
+    // Jika error berasal dari instance ClientError, response akan mengembalikan status fail,
     // status code, dan message sesuai dengan errornya. Jika error bukan ClientError,
     // kembalikan response apa adanya, biarlah Hapi yang menangani response secara default.
     if (response instanceof ClientError) {
@@ -52,6 +51,10 @@ const init = async () => {
       newResponse.code(response.statusCode);
       return newResponse;
     }
+    if (!response.isServer) {
+      return h.continue;
+    }
+    console.log(response);
     return h.continue;
   });
 
