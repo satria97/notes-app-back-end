@@ -1,3 +1,5 @@
+const autoBind = require('auto-bind');
+
 class AuthenticationsHandler {
   // buat constructor class yg menerima authenticationsService, usersService, tokenManager, dan validator.
   constructor(authenticationsService, usersService, tokenManager, validator) {
@@ -6,6 +8,8 @@ class AuthenticationsHandler {
     this._usersService = usersService;
     this._tokenManager = tokenManager;
     this._validator = validator;
+
+    autoBind(this);
   }
 
   // fungsi untuk login
