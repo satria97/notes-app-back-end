@@ -2,15 +2,25 @@
 require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
+const ClientError = require('./exceptions/ClientError');
+
+// notes
 const notes = require('./api/notes');
 // const NotesService = require('./services/inMemory/NotesService');
 const NotesValidator = require('./validator/notes');
-const ClientError = require('./exceptions/ClientError');
 const NotesService = require('./services/postgres/NotesService');
+
+// users
+const users = require('./api/users');
+const UsersService = require('./services/postgres/UsersService');
+const UsersValidator = require('./validator/users');
 
 const init = async () => {
   // buat instance dari NotesService dengan nama notesService.
   const notesService = new NotesService();
+
+  // buat usersService yang merupakan instance dari UsersService
+  const usersService = new UsersService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -26,14 +36,33 @@ const init = async () => {
   // server.route(routes);
 
   // daftarkan plugin notes dengan options.service bernilai notesService menggunakan perintah await server.register
-  await server.register({
-    plugin: notes,
-    options: {
-      service: notesService,
-      // Sama seperti NotesService, untuk mengirimkan data pada plugin, kita akan manfaatkan objek options.
-      validator: NotesValidator
+  // await server.register({
+  //   plugin: notes,
+  //   options: {
+  //     service: notesService,
+  //     // Sama seperti NotesService, untuk mengirimkan data pada plugin, kita akan manfaatkan objek options.
+  //     validator: NotesValidator
+  //   },
+  // });
+
+  // ubah cara registrasi plugin notes dari objek literals menjadi arrays.
+  // agar dapat mendaftarkan lebih dari satu plugin sekaligus.
+  await server.register([
+    {
+      plugin: notes,
+      options: {
+        service: notesService,
+        validator: NotesValidator,
+      },
     },
-  });
+    {
+      plugin: users,
+      options: {
+        service: usersService,
+        validator: UsersValidator,
+      },
+    },
+  ]);
 
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
