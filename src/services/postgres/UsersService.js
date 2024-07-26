@@ -3,6 +3,7 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthenticationError = require('../../exceptions/AuthenticationError');
 
 class UsersService {
   constructor() {
@@ -59,6 +60,32 @@ class UsersService {
     }
 
     return result.rows[0];
+  }
+
+  async verifyUserCredential(username, password) {
+    // dapatkan id dan password dari tabel user berdasarkan username yang dikirimkan melalui parameter
+    const query = {
+      text: 'SELECT id, password FROM users WHERE username = $1',
+      values: [username],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new AuthenticationError('Kredensial yang Anda berikan salah');
+    }
+
+    const { id, password: hashedPassword } = result.rows[0];
+
+    // Untuk melakukan komparasi nilai string plain dan hashed menggunakan bcrypt, gunakan fungsi bcrypt.compare
+    // Fungsi ini akan mengembalikan Promise boolean yang akan bernilai true bila nilai komparasi sesuai dan false bila nilai komparasi tidak sesuai
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationError('Kredensial yang Anda berikan salah');
+    }
+    // kembalikan dengan nilai id user. Nilai user id nantinya akan digunakan dalam membuat access token dan refresh token
+    return id;
   }
 }
 module.exports = UsersService;
