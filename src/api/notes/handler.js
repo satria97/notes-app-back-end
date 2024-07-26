@@ -1,3 +1,5 @@
+const autoBind = require('auto-bind');
+
 class NotesHandler {
   // menerima parameter service
   constructor(service, validator) {
@@ -11,11 +13,12 @@ class NotesHandler {
     // Dengan demikian, sekarang kita bisa mengakses fungsi validateNotePayload melalui this._validator.
     this._validator = validator;
 
-    this.postNoteHandler = this.postNoteHandler.bind(this);
-    this.getNotesHandler = this.getNotesHandler.bind(this);
-    this.getNoteByIdHandler = this.getNoteByIdHandler.bind(this);
-    this.putNoteByIdHandler = this.putNoteByIdHandler.bind(this);
-    this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
+    autoBind(this);
+    // this.postNoteHandler = this.postNoteHandler.bind(this);
+    // this.getNotesHandler = this.getNotesHandler.bind(this);
+    // this.getNoteByIdHandler = this.getNoteByIdHandler.bind(this);
+    // this.putNoteByIdHandler = this.putNoteByIdHandler.bind(this);
+    // this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
   }
 
   // Karena operasi CRUD dari NotesService kini berjalan secara asynchronous,
