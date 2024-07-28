@@ -29,13 +29,21 @@ class NotesHandler {
     this._validator.validateNotePayload(request.payload);
     const { title = 'untitled', body, tags } = request.payload;
 
+    // dapatkan nilai user id alias credentialId dari request.auth.credentials
+    const { id: credentialId } = request.auth.credentials;
+
     // untuk proses memasukan catatan baru, cukup panggil fungsi this._service.addNote
     // this._service.addNote({title, body, tags});
 
     // Karena fungsi this._service.addNote akan mengembalikan id catatan yang disimpan,
     // maka buatlah variabel noteId untuk menampung nilainya
     // const noteId = this._service.addNote({title, body, tags})
-    const noteId = await this._service.addNote({ title, body, tags });
+    // const noteId = await this._service.addNote({ title, body, tags });
+
+    // gunakan credentialId sebagai properti owner pada objek note ketika memanggil fungsi addNote
+    const noteId = await this._service.addNote({
+      title, body, tags, owner: credentialId,
+    });
 
     const response = h.response({
       status: 'success',
@@ -48,8 +56,12 @@ class NotesHandler {
     return response;
   }
 
-  async getNotesHandler() {
-    const notes = await this._service.getNotes();
+  async getNotesHandler(request) {
+    // dapatkan nilai user id alias credentialId dari request.auth.credentials
+    const { id: credentialId } = request.auth.credentials;
+    const notes = await this._service.getNotes(credentialId);
+
+    // const notes = await this._service.getNotes();
     return {
       status: 'success',
       data: {
@@ -61,6 +73,11 @@ class NotesHandler {
   async getNoteByIdHandler(request) {
     // dapatkan nilai id note yang dikirim client melalui path parameter
     const { id } = request.params;
+
+    // dapatkan nilai credentialId dan panggil fungsi verifyNoteOwner dengan memberikan nilai id dan credentialId
+    // Panggil fungsi verifyNoteOwner sebelum pemanggilan fungsi getNoteById
+    const { id: credentialId } = request.auth.credentials;
+    await this._service.verifyNoteOwner(id, credentialId);
 
     // panggil fungsi this._service.getNoteById untuk mendapatkan objek note sesuai id yang diberikan client.
     const note = await this._service.getNoteById(id);
@@ -83,6 +100,11 @@ class NotesHandler {
     // dapatkan nilai id dari request.params yang digunakan pada path parameter sebagai id dari note.
     const { id } = request.params;
 
+    // dapatkan nilai credentialId dan panggil fungsi verifyNoteOwner dengan memberikan nilai id dan credentialId
+    // Panggil fungsi verifyNoteOwner sebelum pemanggilan fungsi getNoteById
+    const { id: credentialId } = request.auth.credentials;
+    await this._service.verifyNoteOwner(id, credentialId);
+
     // kita panggil fungsi this._service.editNoteById, kemudian masukkan id sebagai parameter pertama,
     // dan request.payload yang akan menyediakan title, body, dan tags untuk objek note baru.
     await this._service.editNoteById(id, request.payload);
@@ -94,6 +116,12 @@ class NotesHandler {
 
   async deleteNoteByIdHandler(request) {
     const { id } = request.params;
+
+    // dapatkan nilai credentialId dan panggil fungsi verifyNoteOwner dengan memberikan nilai id dan credentialId
+    // Panggil fungsi verifyNoteOwner sebelum pemanggilan fungsi getNoteById
+    const { id: credentialId } = request.auth.credentials;
+    await this._service.verifyNoteOwner(id, credentialId);
+
     await this._service.deleteNoteById(id);
     return {
       status: 'success',
