@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const { mapDBToModel } = require('../../utils');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class NotesService {
   // buat constructor dan di dalamnya inisialisasi properti this._pool dengan instance dari package pg.Pool.
@@ -11,15 +12,18 @@ class NotesService {
   }
 
   // tambahkan async karena query berjalan secara asynchronous
-  async addNote({ title, body, tags }) {
+  // tambahkan properti owner pada parameter objek note.
+  async addNote({
+    title, body, tags, owner
+  }) {
     const id = nanoid(16);
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
 
     // buat objek query untuk memasukan notes baru ke database
     const query = {
-      text: 'INSERT INTO notes values($1, $2, $3, $4, $5, $6) RETURNING id',
-      values: [id, title, body, tags, createdAt, updatedAt],
+      text: 'INSERT INTO notes values($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      values: [id, title, body, tags, createdAt, updatedAt, owner],
     };
 
     // gunakan fungsi this._pool.query untuk mengeksekusi query
@@ -34,8 +38,16 @@ class NotesService {
     return result.rows[0].id;
   }
 
-  async getNotes() {
-    const result = await this._pool.query('SELECT * FROM notes');
+  //  tambahkan owner sebagai parameter fungsi
+  async getNotes(owner) {
+    // const result = await this._pool.query('SELECT * FROM notes');
+
+    // mendapatkan catatan yang hanya dimiliki oleh owner saja
+    const query = {
+      text: 'SELECT * FROM notes WHERE owner = $1',
+      values: [owner],
+    };
+    const result = await this._pool.query(query);
     return result.rows.map(mapDBToModel);
   }
 
@@ -78,6 +90,27 @@ class NotesService {
     const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan');
+    }
+  }
+
+  // memeriksa apakah catatan dengan id yang diminta adalah hak pengguna
+  async verifyNoteOwner(id, owner) {
+    const query = {
+      text: 'SELECT * FROM notes WHERE id = $1',
+      values: [id],
+    };
+    const result = await this._pool.query(query);
+
+    // bila objek note tidak ditemukan, maka throw NotFoundError
+    if (!result.rows.length) {
+      throw new NotFoundError('Catatan tidak ditemukan');
+    }
+    const note = result.rows[0];
+
+    // lakukan pengecekan kesesuaian owner-nya
+    // bila owner tidak sesuai, maka throw AuthorizationError
+    if (note.owner !== owner) {
+      throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
     }
   }
 }
