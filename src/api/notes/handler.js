@@ -60,7 +60,7 @@ class NotesHandler {
     // dapatkan nilai user id alias credentialId dari request.auth.credentials
     const { id: credentialId } = request.auth.credentials;
     const notes = await this._service.getNotes(credentialId);
-    console.log(notes);
+
     // const notes = await this._service.getNotes();
     return {
       status: 'success',
