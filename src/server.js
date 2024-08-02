@@ -33,7 +33,7 @@ const init = async () => {
   const collaborationsService = new CollaborationsService();
 
   // buat instance dari NotesService dengan nama notesService.
-  const notesService = new NotesService();
+  const notesService = new NotesService(collaborationsService);
 
   // buat usersService yang merupakan instance dari UsersService
   const usersService = new UsersService();
