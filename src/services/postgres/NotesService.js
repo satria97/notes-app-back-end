@@ -7,8 +7,11 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class NotesService {
   // buat constructor dan di dalamnya inisialisasi properti this._pool dengan instance dari package pg.Pool.
-  constructor() {
+  constructor(collaborationService) {
     this._pool = new Pool();
+
+    // tambahkan dependency terhadap CollaborationsService di dalam NotesService.
+    this._collaborationService = collaborationService;
   }
 
   // tambahkan async karena query berjalan secara asynchronous
@@ -111,6 +114,28 @@ class NotesService {
     // bila owner tidak sesuai, maka throw AuthorizationError
     if (note.owner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
+    }
+  }
+
+  // fungsi verifyNoteAccess mengandalkan fungsi verifyCollaborator yang dimiliki oleh CollaborationsService
+  // jadi perlu menambahkan dependency terhadap CollaborationsService di dalam NotesService
+  // Fungsi verifyNoteAccess bertujuan untuk memverifikasi hak akses pengguna (userId) terhadap catatan (id), baik sebagai owner maupun collaboration
+  async verifyNoteAccess(noteId, userId) {
+    try {
+      // memanfaatkan fungsi verifyNoteOwner untuk memeriksa hak akses userId terhadap noteId
+      // Bila userId tersebut merupakan owner dari noteId maka ia akan lolos verifikasi
+      await this.verifyNoteOwner(noteId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        // pemeriksaan hak akses kolaborator, menggunakan fungsi verifyCollaborator
+        // Bila pengguna seorang kolaborator, proses verifikasi akan lolos.
+        await this._collaborationService.verifyCollaborator(noteId, userId);
+      } catch {
+        throw error;
+      }
     }
   }
 }
