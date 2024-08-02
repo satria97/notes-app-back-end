@@ -22,7 +22,16 @@ const AuthenticationsService = require('./services/postgres/AuthenticationsServi
 const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
 
+// collaborations
+const collaborations = require('./api/collaborations');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations');
+
 const init = async () => {
+  // buat instance dari CollaborationsService dengan nama collaborationsService
+  // pastikan pembuatan instance CollaborationsService, tepat sebelum pembuatan instance NotesService
+  const collaborationsService = new CollaborationsService();
+
   // buat instance dari NotesService dengan nama notesService.
   const notesService = new NotesService();
 
@@ -104,7 +113,17 @@ const init = async () => {
         tokenManager: TokenManager,
         validator: AuthenticationsValidator,
       },
-    }
+    },
+
+    // daftarkan plugin collaborations dengan nilai options notesService, collaborationsService, dan CollaborationValidator
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        notesService,
+        validator: CollaborationsValidator,
+      },
+    },
   ]);
 
   server.ext('onPreResponse', (request, h) => {

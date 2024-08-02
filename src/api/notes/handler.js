@@ -77,7 +77,10 @@ class NotesHandler {
     // dapatkan nilai credentialId dan panggil fungsi verifyNoteOwner dengan memberikan nilai id dan credentialId
     // Panggil fungsi verifyNoteOwner sebelum pemanggilan fungsi getNoteById
     const { id: credentialId } = request.auth.credentials;
-    await this._service.verifyNoteOwner(id, credentialId);
+    // await this._service.verifyNoteOwner(id, credentialId);
+
+    // ganti pemanggilan fungsi verifyNoteOwner menjadi verifyNoteAccess
+    await this._service.verifyNoteAccess(id, credentialId);
 
     // panggil fungsi this._service.getNoteById untuk mendapatkan objek note sesuai id yang diberikan client.
     const note = await this._service.getNoteById(id);
@@ -103,7 +106,10 @@ class NotesHandler {
     // dapatkan nilai credentialId dan panggil fungsi verifyNoteOwner dengan memberikan nilai id dan credentialId
     // Panggil fungsi verifyNoteOwner sebelum pemanggilan fungsi getNoteById
     const { id: credentialId } = request.auth.credentials;
-    await this._service.verifyNoteOwner(id, credentialId);
+    // await this._service.verifyNoteOwner(id, credentialId);
+
+    // ganti pemanggilan fungsi verifyNoteOwner menjadi verifyNoteAccess
+    await this._service.verifyNoteAccess(id, credentialId);
 
     // kita panggil fungsi this._service.editNoteById, kemudian masukkan id sebagai parameter pertama,
     // dan request.payload yang akan menyediakan title, body, dan tags untuk objek note baru.
