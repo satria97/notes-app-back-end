@@ -12,10 +12,10 @@ class UsersService {
 
   // buat fungsi asynchronous baru bernama addUser yang menerima parameter objek user (username, password, fullname).
   async addUser({ username, password, fullname }) {
-    // TODO: Verifikasi username, pastikan belum terdaftar.
+    // Verifikasi username, pastikan belum terdaftar.
     await this.verifyNewUsername(username);
 
-    // TODO: Bila verifikasi lolos, maka masukkan user baru ke database.
+    // Bila verifikasi lolos, maka masukkan user baru ke database.
     const id = `user-${nanoid(16)}`;
     // bcrypt.hash menerima dua parameter, yakni data dan saltRounds.
     // Parameter data merupakan nilai yang ingin di-hash yaitu password yang diberikan oleh client
@@ -41,7 +41,7 @@ class UsersService {
       values: [username],
     };
     const result = await this._pool.query(query);
-    // Jika result.rows.length menghasilkan nilai lebih dari 0, itu berarti username sudah ada di database
+    // Jika result.rows.length menghasilkan nilai lebih dari 0, berarti username sudah ada di database
     if (result.rows.length > 0) {
       throw new InvariantError('Gagal menambahkan user. Username sudah digunakan.');
     }
